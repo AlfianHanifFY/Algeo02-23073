@@ -1,0 +1,27 @@
+# Ignore Python virtual environment
+venv/
+
+# Ignore __pycache__ directories
+__pycache__/
+*.py[cod]
+
+# Ignore log files
+*.log
+
+# Ignore test artifacts
+*.pytest_cache/
+
+# Ignore temporary files
+*.tmp
+*.swp
+
+# Ignore compiled files
+*.so
+*.dll
+
+# Ignore IDE settings
+.vscode/
+.idea/
+
+# Ignore Node.js dependencies (if used in frontend)
+node_modules/
