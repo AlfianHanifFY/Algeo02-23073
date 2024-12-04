@@ -1,37 +1,18 @@
 import numpy as np
 import os
-import matplotlib.pyplot as plt
-#from kaggle.api.kaggle_api_extended import KaggleApi
-from io import BytesIO
-import requests
-import pandas as pd
 from PIL import Image
-
-#os.environ['KAGGLE_CONFIG_DIR'] = r'C:\Users\ASUS\.kaggle'
-
-#api = KaggleApi()
-#api.authenticate()
-
-#dataset_name = 'receplyasolu/6k-weather-labeled-spotify-songs'  # Nama Dataset
-download_path = 'datasets\spotify_weather'  # Path to save
-
-#api.dataset_download_files(dataset_name, path=download_path, unzip=True)
-#print(f"Dataset berhasil diunduh dan disimpan di: {download_path}")
+import json
 
 #proses image -> gray -> resize -> flatten
-def process_image(image_path_or_url, target_size = (28,28)):
+def process_image(image_path, target_size = (30,30)):
     try: 
-        if image_path_or_url.startswith("http://") or image_path_or_url.startswith("https://"):
-            response = requests.get(image_url)
-            response.raise_for_status()
-            image_data = BytesIO(response.content)
-            image = Image.open(image_data)
-        else:
-            image = Image.open(image_path_or_url)
+        image = Image.open(image_path)
+
         #grayscale
         image_gray = np.array(image)
         if image_gray.ndim == 3:
             image_gray = np.dot(image_gray[...,:3], [0.2989, 0.5870, 0.1140])
+
         #resized
         height, width = image_gray.shape
         target_height, target_width = target_size
@@ -47,7 +28,7 @@ def process_image(image_path_or_url, target_size = (28,28)):
         flattened_image = resized_image.flatten()
         return flattened_image
     except Exception as e:
-        print(f"Error memproses gambar dari URL: {image_url}. Error: {e}")
+        print(f"Error processing image {image_path}: {e}")
         return None
 
 #PCA
@@ -104,58 +85,69 @@ def projection_query_image(query_image, mean_pixel, Uk):
     query_projected = query_image_centered.dot(Uk)  # Proyeksi gambar query ke ruang PCA
     return query_projected
 
+# Fungsi untuk menyimpan hasil PCA
+def save_pca_results(mean_pixel, Uk, X_projected, prefix="pca_results"):
+    result_folder = os.path.join('test', 'pca_result')
+    os.makedirs(result_folder, exist_ok=True)
 
-#Load CSV file
-current_path = os.getcwd()
-relative_path = os.path.join("src", "backend", "datasets","spotify_weather")
-dataset_folder_path = os.path.join(current_path, relative_path)
+    np.save(os.path.join(result_folder, f"{prefix}_mean_pixel.npy"), mean_pixel)
+    np.save(os.path.join(result_folder, f"{prefix}_Uk.npy"), Uk)
+    np.save(os.path.join(result_folder, f"{prefix}_X_projected.npy"), X_projected)
 
-csv_file = input("Masukkan path file CSV dataset: ")
-image_file_path = os.path.join(dataset_folder_path, csv_file)
-if os.path.isfile(image_file_path):
-    print(f"File ditemukan: {image_file_path}")
-    data = pd.read_csv(image_file_path)
+# Fungsi untuk memuat hasil PCA
+def load_pca_results(prefix="pca_results"):
+    result_folder = os.path.join('test', 'pca_result')
+    
+    mean_pixel = np.load(os.path.join(result_folder, f"{prefix}_mean_pixel.npy"))
+    Uk = np.load(os.path.join(result_folder, f"{prefix}_Uk.npy"))
+    X_projected = np.load(os.path.join(result_folder, f"{prefix}_X_projected.npy"))
+    return mean_pixel, Uk, X_projected
 
-    image_urls = data['Image']
-
+# Read JSON + Process + Numpy Array + PCA
+def read_json_and_process (album_data):
     images = []
-    image_info = []  # Menyimpan nama track/artis
-    for idx, image_url in enumerate(image_urls):
-        processed_image = process_image(image_url)
+    ids = []
+    for album in album_data:
+        album_id = album["id"]  # ID dari file JSON
+        image_path = album["image_path"]  # Path gambar dari JSON
+        
+        processed_image = process_image(image_path)
+
         if processed_image is not None:
             images.append(processed_image)
-            image_info.append(f"{data.loc[idx, 'Artist']} - {data.loc[idx, 'Album']}")
+            ids.append(album_id)
+            
     X = np.array(images)
 
-    # Hitung PCA secara manual
+    # Hitung PCA
     mean_pixel, Uk, X_projected = pca(X, k=3)
+    save_pca_results(mean_pixel, Uk, X_projected)
 
-    #Query dengan URL/Path file lokal
-    query_image_input = input("Masukkan URL gambar / path file lokal yang ingin dicek: ")
-    if query_image_input.startswith("http://") or query_image_input.startswith("https://"):
-        query_image = process_image(query_image_input)
-    else:
-        relative_path_query = os.path.join("src", "backend","query")
-        dataset_folder_path_query = os.path.join(current_path, relative_path_query)
+def main():
+    current_path = os.path.dirname(os.path.abspath(__file__))
+    json_path = os.path.join(current_path, '..', '..', 'test', 'map.json')
 
-        image_file_path = os.path.join(dataset_folder_path_query, query_image_input)
-        if not os.path.isfile(image_file_path):
-            print(f"File {image_file_path} tidak ditemukan.")
-            query_image = None
-        elif not query_image_input.lower().endswith(".jpg"):
-            print("File bukan berupa .jpg.")
-            query_image = None
-        else:
-            try:
-                image = Image.open(image_file_path)
-                query_image = process_image(image_file_path)
-            except Exception as e:
-                print(f"Error memproses file lokal: {e}")
-                query_image = None
+    with open(json_path, 'r') as file:
+        album_data = json.load(file)
 
-    if query_image is None:
-        print("Gagal memproses gambar query.")
-    else:
+    read_json_and_process(album_data) #klo udah diproses di awal, make as comment
+
+    mean_pixel, Uk, X_projected = load_pca_results()
+
+    dataset_folder_path_query = r'D:\ImageProcessing\Algeo2\Algeo02-23073\test\query'
+
+    # Nama Query
+    query_image_input = input(f"Masukkan nama file gambar (.jpg) yang ada di folder {dataset_folder_path_query}: ")
+
+    # Membentuk path lengkap ke file gambar
+    image_file_path = os.path.join(dataset_folder_path_query, query_image_input)
+    try:
+        query_image = process_image(image_file_path)
+    except Exception as e:
+        print(f"Error memproses file lokal: {e}")
+        query_image = None
+
+    if query_image is not None:
         query_projected = projection_query_image(query_image, mean_pixel, Uk)
 
         #Jarak euclidean
@@ -166,40 +158,18 @@ if os.path.isfile(image_file_path):
             squared_diff = (query_projected - X_projected[i]) ** 2
             # sum + akar kuadrat
             distances[i] = np.sqrt(np.sum(squared_diff))
+        
+        sorted_indices = np.argsort(distances) #urutan index
+        closest_image_idx = sorted_indices[0] # 1 gambar dengan jarak paling kecil
 
-        #Urutkan gambar
-        sorted_indices = np.argsort(distances) #semakin jarak kecil, semakin mirip
+        closest_image_id = album_data[closest_image_idx]["id"]
+        return closest_image_id, distances[closest_image_idx]
+    else:
+        return None, None
 
-        #Ambil 3 gambar teratas (contoh)
-        num_results = 3
-        top_k_images = sorted_indices[:num_results]
+#try
 
-        #Tampilkan hasil gambar (just to check)
-        print("Gambar yang paling mirip dengan query:")
-        for idx in top_k_images:
-            #print(f"File gambar: {image_files[idx]}, Jarak Euclidean: {distances[idx]}")
-            print(f"Track: {image_info[idx]}, Jarak Euclidean: {distances[idx]}")
-
-        for idx in top_k_images:
-            image_url = image_urls[idx]
-            print(f"Menampilkan gambar: {image_info[idx]} (URL: {image_url})")
-            
-            try:
-                # Download gambar
-                response = requests.get(image_url)
-                response.raise_for_status()
-                image_data = BytesIO(response.content)
-                # Load gambar menggunakan PIL
-                image = Image.open(image_data)
-
-                # Tampilkan gambar use Matplotlib
-                plt.figure()
-                plt.imshow(image)
-                plt.title(image_info[idx])
-                plt.axis('off')
-            except Exception as e:
-                print(f"Error menampilkan gambar dari URL: {image_url}. Error: {e}")
-
-        plt.show()
-else:
-    print(f"File '{csv_file}' tidak ditemukan di {image_file_path}")
+if __name__ == "__main__":
+    closest_image_id, closest_distance = main()
+    print(f"ID Gambar Terdekat: {closest_image_id}")
+    print(f"Jarak Euclidean: {closest_distance}")
