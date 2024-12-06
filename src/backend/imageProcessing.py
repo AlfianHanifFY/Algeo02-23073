@@ -2,6 +2,7 @@ import numpy as np
 import os
 from PIL import Image
 import json
+import time
 
 #proses image -> gray -> resize -> flatten
 def process_image(image_path, target_size = (64,64)): #cek ukuran
@@ -53,7 +54,8 @@ def projection_query_image(query_image, mean_pixel, Uk):
 
 # Fungsi untuk menyimpan hasil PCA
 def save_pca_results(mean_pixel, Uk, X_projected, prefix="pca_results"):
-    result_folder = os.path.join('test', 'pca_result')
+    current_path = os.path.dirname(os.path.abspath(__file__))
+    result_folder = os.path.join(current_path, '..', '..', 'test', 'pca_result')
     os.makedirs(result_folder, exist_ok=True)
 
     np.save(os.path.join(result_folder, f"{prefix}_mean_pixel.npy"), mean_pixel)
@@ -73,8 +75,9 @@ def load_pca_results(prefix="pca_results"):
 def read_json_and_process (album_data):
     images = []
     ids = []
-    for album in album_data:
-        album_id = album["id"]  # ID dari file JSON
+    for idx, album in enumerate (album_data):
+        album_id = album.get("id", f"{idx}")
+        album["id"] = album_id  # Tambahkan ID ke file JSON
         image_path = album["image_path"]  # Path gambar dari JSON
         
         processed_image = process_image(image_path)
@@ -91,21 +94,24 @@ def read_json_and_process (album_data):
 
 def main():
     current_path = os.path.dirname(os.path.abspath(__file__))
-    json_path = os.path.join(current_path, '..', '..', 'test', 'map.json')
+    json_path = os.path.join(current_path, '..', '..', 'test', 'dataset', 'mapper' , 'map.json')
     pca_result_path = os.path.join(current_path, '..', '..', 'test', 'pca_result', 'pca_results_mean_pixel.npy')
 
     with open(json_path, 'r') as file:
-            album_data = json.load(file)
+        album_data = json.load(file)
+
+    start_time = time.time()
             
     #Jika file pca ada
     if not os.path.isfile(pca_result_path): 
         read_json_and_process(album_data) #klo udah diproses di awal, make as comment
 
     mean_pixel, Uk, X_projected = load_pca_results()
-
-    dataset_folder_path_query = r'D:\ImageProcessing\Algeo2\Algeo02-23073\test\query'
-
+    
+    dataset_folder_path_query = os.path.join(current_path, '..', '..', 'test', 'query')
+    
     # Nama Query
+    dataset_folder_path_query = os.path.join(current_path, '..', '..', 'test', 'query', 'image')
     query_image_input = input(f"Masukkan nama file gambar (.jpg) yang ada di folder {dataset_folder_path_query}: ")
 
     # Membentuk path lengkap ke file gambar
@@ -123,23 +129,23 @@ def main():
         distances = np.linalg.norm(query_projected - X_projected, axis=1)
         
         sorted_indices = np.argsort(distances) #urutan index
-        min_distance = distances[sorted_indices[0]]
 
-        closest_image_ids = []
-        i = 0
-        while i < len(sorted_indices) and distances[sorted_indices[i]] == min_distance:
-            closest_idx = sorted_indices[i]
-            closest_image_ids.append(album_data[closest_idx]["id"])
-            i += 1
+        ordered_results = []
+        for idx in sorted_indices:
+            album_info = album_data[idx].copy()  # Salin informasi album
+            album_info["distance"] = distances[idx]  # Tambahkan jarak ke informasi album
+            ordered_results.append(album_info)  # Simpan informasi album ke hasil urutan
 
-        return closest_image_ids, min_distance
+        end_time = time.time()
+        processing_time = end_time - start_time
+        return ordered_results, processing_time
     else:
         return None, None
-
+'''
 #try
 
 if __name__ == "__main__":
-    closest_image_id, closest_distance = main()
-    print(f"ID Gambar Terdekat: {closest_image_id}")
-    print(f"Jarak Euclidean: {closest_distance}")
-
+    closest_image_id, process = main()
+    print(f"Gambar: {closest_image_id}")
+    print(f"Processing Time: {process}")
+'''

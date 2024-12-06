@@ -1,122 +1,102 @@
 [
     {
-      "id": 1,
       "album_name": "ceritera",
       "artist_name": "hivi!",
-      "image_path": "test/gambar/1.jpg"
+      "image_path": "test/dataset/album/1.jpg"
     },
     {
-      "id": 2,
       "album_name": "kereta kencan",
       "artist_name": "hivi!",
-      "image_path": "test/gambar/2.jpg"
+      "image_path": "test/dataset/album/2.jpg"
     },
     {
-        "id": 3,
         "album_name": "sialnya, hidup harus terus berjalan",
         "artist_name": "bernadya",
-        "image_path": "test/gambar/3.jpg"
+        "image_path": "test/dataset/album/3.jpg"
     },
     {
-        "id": 4,
         "album_name": "reality club presents...",
         "artist_name": "Reality Club",
-        "image_path": "test/gambar/4.jpg"
+        "image_path": "test/dataset/album/4.jpg"
     },
     {
-        "id": 5,
         "album_name": "Never Get Better",
         "artist_name": "Reality Club",
-        "image_path": "test/gambar/5.jpg"
+        "image_path": "test/dataset/album/5.jpg"
     },
     {
-        "id": 6,
         "album_name": "Eternal Sunshine",
         "artist_name": "Ariana Grande",
-        "image_path": "test/gambar/6.jpg"
+        "image_path": "test/dataset/album/6.jpg"
     },
     {
-        "id": 7,
         "album_name": "My Everything",
         "artist_name": "Ariana Grande",
-        "image_path": "test/gambar/7.jpg"
+        "image_path": "test/dataset/album/7.jpg"
     },
     {
-        "id": 8,
         "album_name": "Eternal Sunshine",
         "artist_name": "Ariana Grande",
-        "image_path": "test/gambar/6.jpg"
+        "image_path": "test/dataset/album/6.jpg"
     },
     {
-        "id": 9,
         "album_name": "Lagipula Hidup Akan Berakhir",
         "artist_name": "Hindia",
-        "image_path": "test/gambar/9.jpg"
+        "image_path": "test/dataset/album/9.jpg"
     },
     {
-        "id": 10,
         "album_name": "Lagipula Hidup Akan Berakhir",
         "artist_name": "Hindia",
-        "image_path": "test/gambar/9.jpg"
+        "image_path": "test/dataset/album/9.jpg"
     },
     {
-        "id": 11,
         "album_name": "Sentimental",
         "artist_name": "Juicy Luicy",
-        "image_path": "test/gambar/11.jpg"
+        "image_path": "test/dataset/album/11.jpg"
     },
     {
-        "id": 12,
         "album_name": "Nonfiksi",
         "artist_name": "Juicy Luicy",
-        "image_path": "test/gambar/12.jpg"
+        "image_path": "test/dataset/album/12.jpg"
     },
     {
-        "id": 13,
         "album_name": "Heavy Rotation",
         "artist_name": "JKT48",
-        "image_path": "test/gambar/13.jpg"
+        "image_path": "test/dataset/album/13.jpg"
     },
     {
-        "id": 14,
         "album_name": "The Album",
         "artist_name": "BLACKPINK",
-        "image_path": "test/gambar/14.jpg"
+        "image_path": "test/dataset/album/14.jpg"
     },
     {
-        "id": 15,
         "album_name": "Blackpink in Your Area",
         "artist_name": "BLACKPINK",
-        "image_path": "test/gambar/15.jpg"
+        "image_path": "test/dataset/album/15.jpg"
     },
     {
-        "id": 16,
         "album_name": "A Night at the Opera",
         "artist_name": "Queen",
-        "image_path": "test/gambar/16.jpg"
+        "image_path": "test/dataset/album/16.jpg"
     },
     {
-        "id": 17,
         "album_name": "Blackpink in Your Area",
         "artist_name": "BLACKPINK",
-        "image_path": "test/gambar/15.jpg"
+        "image_path": "test/dataset/album/15.jpg"
     },
     {
-        "id": 18,
         "album_name": "A Night at the Opera",
         "artist_name": "Queen",
-        "image_path": "test/gambar/16.jpg"
+        "image_path": "test/dataset/album/16.jpg"
     },
     {
-        "id": 19,
         "album_name": "1989",
         "artist_name": "Taylor Swift",
-        "image_path": "test/gambar/19.jpg"
+        "image_path": "test/dataset/album/19.jpg"
     },
     {
-        "id": 20,
         "album_name": "Folklore",
         "artist_name": "Taylor Swift",
-        "image_path": "test/gambar/20.jpg"
+        "image_path": "test/dataset/album/20.jpg"
     }
   ]
