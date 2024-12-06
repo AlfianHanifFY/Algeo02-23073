@@ -4,7 +4,7 @@ from PIL import Image
 import json
 
 #proses image -> gray -> resize -> flatten
-def process_image(image_path, target_size = (30,30)):
+def process_image(image_path, target_size = (64,64)): #cek ukuran
     try: 
         image = Image.open(image_path)
 
@@ -34,49 +34,15 @@ def process_image(image_path, target_size = (30,30)):
 #PCA
 def pca(X,k):
     # Mean centering data
-    n_samples, n_features = X.shape
-    mean_pixel = np.sum(X, axis=0) / n_samples  # Menghitung rata-rata manual
-    X_centered = X - mean_pixel  # Centering data
-    
-    # Hitung matriks kovarians 
-    covariance_matrix = np.zeros((n_features, n_features))
-    for i in range(n_features):
-        for j in range(n_features):
-            covariance_matrix[i, j] = np.sum(X_centered[:, i] * X_centered[:, j]) / (n_samples - 1)
-    # Eigen decomposition 
-    def power_iteration(matrix, num_simulations=1000, tolerance=1e-6):
-        b_k = np.random.rand(matrix.shape[1])  # Vektor awal acak -> perkiraan awal untuk eigenvektor
-        for _ in range(num_simulations):
-            # Hitung hasil perkalian matriks dan vektor
-            b_k1 = np.dot(matrix, b_k)
-            # Normalisasi vektor
-            b_k1_norm = np.linalg.norm(b_k1)
-            b_k = b_k1 / b_k1_norm
-            # Cek konvergensi
-            if np.allclose(matrix @ b_k, b_k1_norm * b_k, atol=tolerance):
-                break
-        eigenvalue = b_k1_norm
-        eigenvector = b_k
-        return eigenvalue, eigenvector
-    
-    # Iterasi untuk menemukan eigenvalues dan eigenvectors
-    eigvals = []
-    eigvecs = []
-    A = covariance_matrix.copy()
-    for _ in range(k):  # Ambil k komponen utama
-        eigenvalue, eigenvector = power_iteration(A)
-        eigvals.append(eigenvalue)
-        eigvecs.append(eigenvector)
-        # Reduksi matriks untuk mencari eigenvalue/eigenvector berikutnya
-        A = A - eigenvalue * np.outer(eigenvector, eigenvector)
-    
-    eigvals = np.array(eigvals)
-    eigvecs = np.array(eigvecs).T  # Transpose agar setiap kolom adalah eigenvector
-    
-    # Proyeksikan data ke ruang PCA
-    Uk = eigvecs[:, :k]
+    mean_pixel = np.mean(X, axis=0)
+    X_centered= X - mean_pixel # Centering data
+
+    #PCA dengan SVD
+    U,Sigma,Vt = np.linalg.svd(X_centered, full_matrices=False)
+    k = 4
+    Uk = Vt.T[:,:k]
     X_projected = X_centered.dot(Uk)
-    
+
     return mean_pixel, Uk, X_projected
 
 # Memproyeksikan gambar query ke ruang komponen utama
@@ -126,11 +92,14 @@ def read_json_and_process (album_data):
 def main():
     current_path = os.path.dirname(os.path.abspath(__file__))
     json_path = os.path.join(current_path, '..', '..', 'test', 'map.json')
+    pca_result_path = os.path.join(current_path, '..', '..', 'test', 'pca_result', 'pca_results_mean_pixel.npy')
 
     with open(json_path, 'r') as file:
-        album_data = json.load(file)
-
-    read_json_and_process(album_data) #klo udah diproses di awal, make as comment
+            album_data = json.load(file)
+            
+    #Jika file pca ada
+    if not os.path.isfile(pca_result_path): 
+        read_json_and_process(album_data) #klo udah diproses di awal, make as comment
 
     mean_pixel, Uk, X_projected = load_pca_results()
 
@@ -151,19 +120,19 @@ def main():
         query_projected = projection_query_image(query_image, mean_pixel, Uk)
 
         #Jarak euclidean
-        distances = np.zeros(X_projected.shape[0])  # Array simpen jarak euclidean
-
-        for i in range(X_projected.shape[0]):
-            # kurangkan + kuadrat
-            squared_diff = (query_projected - X_projected[i]) ** 2
-            # sum + akar kuadrat
-            distances[i] = np.sqrt(np.sum(squared_diff))
+        distances = np.linalg.norm(query_projected - X_projected, axis=1)
         
         sorted_indices = np.argsort(distances) #urutan index
-        closest_image_idx = sorted_indices[0] # 1 gambar dengan jarak paling kecil
+        min_distance = distances[sorted_indices[0]]
 
-        closest_image_id = album_data[closest_image_idx]["id"]
-        return closest_image_id, distances[closest_image_idx]
+        closest_image_ids = []
+        i = 0
+        while i < len(sorted_indices) and distances[sorted_indices[i]] == min_distance:
+            closest_idx = sorted_indices[i]
+            closest_image_ids.append(album_data[closest_idx]["id"])
+            i += 1
+
+        return closest_image_ids, min_distance
     else:
         return None, None
 
@@ -173,3 +142,4 @@ if __name__ == "__main__":
     closest_image_id, closest_distance = main()
     print(f"ID Gambar Terdekat: {closest_image_id}")
     print(f"Jarak Euclidean: {closest_distance}")
+

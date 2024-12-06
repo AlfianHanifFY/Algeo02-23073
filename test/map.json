@@ -28,5 +28,95 @@
         "album_name": "Never Get Better",
         "artist_name": "Reality Club",
         "image_path": "test/gambar/5.jpg"
+    },
+    {
+        "id": 6,
+        "album_name": "Eternal Sunshine",
+        "artist_name": "Ariana Grande",
+        "image_path": "test/gambar/6.jpg"
+    },
+    {
+        "id": 7,
+        "album_name": "My Everything",
+        "artist_name": "Ariana Grande",
+        "image_path": "test/gambar/7.jpg"
+    },
+    {
+        "id": 8,
+        "album_name": "Eternal Sunshine",
+        "artist_name": "Ariana Grande",
+        "image_path": "test/gambar/6.jpg"
+    },
+    {
+        "id": 9,
+        "album_name": "Lagipula Hidup Akan Berakhir",
+        "artist_name": "Hindia",
+        "image_path": "test/gambar/9.jpg"
+    },
+    {
+        "id": 10,
+        "album_name": "Lagipula Hidup Akan Berakhir",
+        "artist_name": "Hindia",
+        "image_path": "test/gambar/9.jpg"
+    },
+    {
+        "id": 11,
+        "album_name": "Sentimental",
+        "artist_name": "Juicy Luicy",
+        "image_path": "test/gambar/11.jpg"
+    },
+    {
+        "id": 12,
+        "album_name": "Nonfiksi",
+        "artist_name": "Juicy Luicy",
+        "image_path": "test/gambar/12.jpg"
+    },
+    {
+        "id": 13,
+        "album_name": "Heavy Rotation",
+        "artist_name": "JKT48",
+        "image_path": "test/gambar/13.jpg"
+    },
+    {
+        "id": 14,
+        "album_name": "The Album",
+        "artist_name": "BLACKPINK",
+        "image_path": "test/gambar/14.jpg"
+    },
+    {
+        "id": 15,
+        "album_name": "Blackpink in Your Area",
+        "artist_name": "BLACKPINK",
+        "image_path": "test/gambar/15.jpg"
+    },
+    {
+        "id": 16,
+        "album_name": "A Night at the Opera",
+        "artist_name": "Queen",
+        "image_path": "test/gambar/16.jpg"
+    },
+    {
+        "id": 17,
+        "album_name": "Blackpink in Your Area",
+        "artist_name": "BLACKPINK",
+        "image_path": "test/gambar/15.jpg"
+    },
+    {
+        "id": 18,
+        "album_name": "A Night at the Opera",
+        "artist_name": "Queen",
+        "image_path": "test/gambar/16.jpg"
+    },
+    {
+        "id": 19,
+        "album_name": "1989",
+        "artist_name": "Taylor Swift",
+        "image_path": "test/gambar/19.jpg"
+    },
+    {
+        "id": 20,
+        "album_name": "Folklore",
+        "artist_name": "Taylor Swift",
+        "image_path": "test/gambar/20.jpg"
     }
   ]
