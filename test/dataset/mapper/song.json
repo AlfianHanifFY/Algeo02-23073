@@ -1,0 +1,37 @@
+[
+    {   
+        "id": 1,
+        "album_name": "Ceritera",
+        "artist_name": "Hivi!",
+        "song": "test/dataset/midi/Jatuh,_Bangkit_Kembali!.mid",
+        "image_path": "test/dataset/album/1.jpg"
+    },
+    {   
+        "id": 2,
+        "album_name": "Kereta Kencan",
+        "artist_name": "Hivi!",
+        "song": "test/dataset/midi/Siapkah_Kau_Tuk_Jatuh_Cinta_Lagi.mid",
+        "image_path": "test/dataset/album/2.jpg"
+    },
+    {   
+        "id": 3,
+        "album_name": "Sialnya, Hidup Harus Terus Berjalan",
+        "artist_name": "Bernadya",
+        "song": "test/dataset/midi/Untungnya,_Hidup_Harus_Tetap_Berjalan.mid",
+        "image_path": "test/dataset/album/3.jpg"
+    },
+    {   
+        "id": 4,
+        "album_name": "Reality Club Presents...",
+        "artist_name": "Reality Club",
+        "song": "test/dataset/midi/Anything_You_Want.mid",
+        "image_path": "test/dataset/album/4.jpg"
+    },
+    {   
+        "id": 5,
+        "album_name": "Eternal Sunshine",
+        "artist_name": "Ariana Grande",
+        "song": "test/dataset/midi/We_Can't_Be_Friends.mid",
+        "image_path": "test/dataset/album/6.jpg"
+    }
+]
