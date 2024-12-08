@@ -33,14 +33,17 @@ def process_image(image_path, target_size = (64,64)): #cek ukuran
         return None
 
 #PCA
-def pca(X,k):
+def pca(X, variance_threshold=0.95):
     # Mean centering data
     mean_pixel = np.mean(X, axis=0)
     X_centered= X - mean_pixel # Centering data
 
     #PCA dengan SVD
     U,Sigma,Vt = np.linalg.svd(X_centered, full_matrices=False)
-    k = 4
+
+    cumulative_variance = np.cumsum(Sigma**2) / np.sum(Sigma**2)
+    k = np.argmax(cumulative_variance >= variance_threshold) + 1
+    
     Uk = Vt.T[:,:k]
     X_projected = X_centered.dot(Uk)
 
@@ -89,7 +92,7 @@ def read_json_and_process (album_data):
     X = np.array(images)
 
     # Hitung PCA
-    mean_pixel, Uk, X_projected = pca(X, k=3)
+    mean_pixel, Uk, X_projected = pca(X, variance_threshold=0.95)
     save_pca_results(mean_pixel, Uk, X_projected)
 
 def main():
