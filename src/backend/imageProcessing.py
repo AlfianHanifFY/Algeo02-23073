@@ -33,14 +33,17 @@ def process_image(image_path, target_size = (64,64)): #cek ukuran
         return None
 
 #PCA
-def pca(X,k):
+def pca(X, variance_threshold=0.95):
     # Mean centering data
     mean_pixel = np.mean(X, axis=0)
     X_centered= X - mean_pixel # Centering data
 
     #PCA dengan SVD
     U,Sigma,Vt = np.linalg.svd(X_centered, full_matrices=False)
-    k = 4
+
+    cumulative_variance = np.cumsum(Sigma**2) / np.sum(Sigma**2)
+    k = np.argmax(cumulative_variance >= variance_threshold) + 1
+    
     Uk = Vt.T[:,:k]
     X_projected = X_centered.dot(Uk)
 
@@ -89,7 +92,7 @@ def read_json_and_process (album_data):
     X = np.array(images)
 
     # Hitung PCA
-    mean_pixel, Uk, X_projected = pca(X, k=3)
+    mean_pixel, Uk, X_projected = pca(X, variance_threshold=0.95)
     save_pca_results(mean_pixel, Uk, X_projected)
 
 def main():
@@ -99,8 +102,6 @@ def main():
 
     with open(json_path, 'r') as file:
         album_data = json.load(file)
-
-    start_time = time.time()
             
     #Jika file pca ada
     if not os.path.isfile(pca_result_path): 
@@ -115,6 +116,7 @@ def main():
     query_image_input = input(f"Masukkan nama file gambar (.jpg) yang ada di folder {dataset_folder_path_query}: ")
 
     # Membentuk path lengkap ke file gambar
+    start_time = time.time()
     image_file_path = os.path.join(dataset_folder_path_query, query_image_input)
     try:
         query_image = process_image(image_file_path)
@@ -128,12 +130,20 @@ def main():
         #Jarak euclidean
         distances = np.linalg.norm(query_projected - X_projected, axis=1)
         
-        sorted_indices = np.argsort(distances) #urutan index
+        # Jarak maksimum 
+        max_distance = np.max(distances)
 
+        sorted_indices = np.argsort(distances) #urutan index
+        
         ordered_results = []
         for idx in sorted_indices:
             album_info = album_data[idx].copy()  # Salin informasi album
             album_info["distance"] = distances[idx]  # Tambahkan jarak ke informasi album
+
+            similarity_percentage = (1 - (distances[idx] / max_distance)) * 100
+            similarity_percentage = max(0.0, similarity_percentage)  # Menghindari nilai negatif
+
+            album_info["similarity"] = similarity_percentage  # Tambahkan persentase kemiripan
             ordered_results.append(album_info)  # Simpan informasi album ke hasil urutan
 
         end_time = time.time()
@@ -141,11 +151,11 @@ def main():
         return ordered_results, processing_time
     else:
         return None, None
-'''
+
 #try
 
 if __name__ == "__main__":
     closest_image_id, process = main()
     print(f"Gambar: {closest_image_id}")
     print(f"Processing Time: {process}")
-'''
+
