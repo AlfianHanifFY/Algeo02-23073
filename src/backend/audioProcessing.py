@@ -3,6 +3,7 @@ import json
 import librosa
 import numpy as np
 import mido
+import time
 from scipy.signal import find_peaks
 
 
@@ -15,11 +16,12 @@ def manual_cosine_similarity(vec1, vec2):
     return dot_product / (norm_vec1 * norm_vec2)
 
 
+# .wav
 def load_audio(file_path):
     y, sr = librosa.load(file_path)
     return y, sr
 
-
+# .wav
 def extract_pitches(y, sr):
     onset_env = librosa.onset.onset_strength(y=y, sr=sr)
     peaks, _ = find_peaks(onset_env, height=0.1)
@@ -32,7 +34,7 @@ def extract_pitches(y, sr):
 
     return detected_pitches, peaks / sr
 
-
+# .midi
 def extract_midi_features(midi_file_path):
     midi = mido.MidiFile(midi_file_path)
     notes = []
@@ -64,11 +66,17 @@ def resample_features(features_1, features_2):
 
 
 def calculate_audio_midi_similarity(audio_file, midi_file_to_compare):
+    # audio_file = query
+    # midi_file_to_compare = dataset
+    
+    # load .wav
     y, sr = load_audio(audio_file)
     pitches, times = extract_pitches(y, sr)
 
+    # load .mid
     notes, timings = extract_midi_features(midi_file_to_compare)
 
+    # normalize
     max_time_audio = max(times)
     normalized_times_audio = [t / max_time_audio for t in times]
 
@@ -83,6 +91,7 @@ def calculate_audio_midi_similarity(audio_file, midi_file_to_compare):
 
     features_audio_resampled, features_midi_resampled = resample_features(features_audio_flat, features_midi_flat)
 
+    # similarity
     similarity = manual_cosine_similarity(features_audio_resampled, features_midi_resampled)
 
     return similarity
@@ -90,21 +99,27 @@ def calculate_audio_midi_similarity(audio_file, midi_file_to_compare):
 
 def search_manual_midi_files(audio_file, json_file_path, base_dir):
     # Load MIDI file paths from the JSON file
+    start_time = time.time()
     with open(json_file_path, "r") as json_file:
         midi_data = json.load(json_file)
 
+    # initiate return
     similarities = []
+    
     for entry in midi_data:
-        midi_file = os.path.join(base_dir, entry["song"])
+        midi_file = os.path.join(base_dir, entry["audio_file"])
         if not os.path.isfile(midi_file):
             print(f"File not found: {midi_file}")
             continue
-
+        
+        # load .wav
         y, sr = load_audio(audio_file)
         pitches, times = extract_pitches(y, sr)
 
+        # load .mid ke-n
         notes, timings = extract_midi_features(midi_file)
 
+        # normalize
         max_time_audio = max(times)
         normalized_times_audio = [t / max_time_audio for t in times]
 
@@ -119,30 +134,31 @@ def search_manual_midi_files(audio_file, json_file_path, base_dir):
 
         features_audio_resampled, features_midi_resampled = resample_features(features_audio_flat, features_midi_flat)
 
+        # similarity
         similarity = manual_cosine_similarity(features_audio_resampled, features_midi_resampled)
         
-        # Append the result with id, song, and similarity
+        # Append the result 
         similarities.append({
-            "id": entry["id"],
-            "song": entry["song"],
-            "similarity": similarity
+            "pic_name" : entry["pic_name"],
+            "audio_file": entry["audio_file"],
+            "similarity": similarity 
         })
 
-    # Sort similarities by similarity value in descending order
+    # Sort similarities descending
     sorted_similarities = sorted(similarities, key=lambda item: item["similarity"], reverse=True)
+    end_time = time.time()
+    processing_time = end_time - start_time
+    return sorted_similarities, processing_time
 
-    return sorted_similarities
 
+# # Example usage
+# audio_file = "/Users/alfianhaniffy/Documents/ITB/ALGEO/Algeo02-23073/test/query/humming/ariana2.wav"
+# json_file_path = "/Users/alfianhaniffy/Documents/ITB/ALGEO/Algeo02-23073/test/dataset/mapper/final.json"
+# base_dir = "/Users/alfianhaniffy/Documents/ITB/ALGEO/Algeo02-23073/test/dataset/music"
 
-# Example usage
-audio_file = "C:/Documents/a_new_journey_of_semester_3/Algeo/tubesAlgeo5/test/audio/ariana2.wav"
-json_file_path = "C:/Documents/a_new_journey_of_semester_3/Algeo/tubesAlgeo5/test/dataset/mapper/song.json"
-base_dir = "C:/Documents/a_new_journey_of_semester_3/Algeo/tubesAlgeo5"
+# similarities,proccessing_time = search_manual_midi_files(audio_file, json_file_path, base_dir)
 
-similarities = search_manual_midi_files(audio_file, json_file_path, base_dir)
-
-# Print top 4 results
-for result in similarities[:4]:
-    print(f"ID: {result['id']}, Song: {result['song']}, Similarity: {result['similarity']:.4f}")
-
+# # Print top 4 results
+# for result in similarities:
+#     print(f"music: {result['audio_file']}, album: {result['pic_name']}, Similarity: {result['similarity']:.4f}, proses = {proccessing_time}")
 

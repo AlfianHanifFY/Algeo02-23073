@@ -81,7 +81,7 @@ def read_json_and_process (album_data):
     for idx, album in enumerate (album_data):
         album_id = album.get("id", f"{idx}")
         album["id"] = album_id  # Tambahkan ID ke file JSON
-        image_path = album["image_path"]  # Path gambar dari JSON
+        image_path = "test/dataset/album/" + album["pic_name"]  # Path gambar dari JSON
         
         processed_image = process_image(image_path)
 
@@ -95,11 +95,7 @@ def read_json_and_process (album_data):
     mean_pixel, Uk, X_projected = pca(X, variance_threshold=0.95)
     save_pca_results(mean_pixel, Uk, X_projected)
 
-def main():
-    current_path = os.path.dirname(os.path.abspath(__file__))
-    json_path = os.path.join(current_path, '..', '..', 'test', 'dataset', 'mapper' , 'map.json')
-    pca_result_path = os.path.join(current_path, '..', '..', 'test', 'pca_result', 'pca_results_mean_pixel.npy')
-
+def imageRetrieval(json_path,pca_result_path,query_path):
     with open(json_path, 'r') as file:
         album_data = json.load(file)
             
@@ -108,16 +104,10 @@ def main():
         read_json_and_process(album_data) #klo udah diproses di awal, make as comment
 
     mean_pixel, Uk, X_projected = load_pca_results()
-    
-    dataset_folder_path_query = os.path.join(current_path, '..', '..', 'test', 'query')
-    
-    # Nama Query
-    dataset_folder_path_query = os.path.join(current_path, '..', '..', 'test', 'query', 'image')
-    query_image_input = input(f"Masukkan nama file gambar (.jpg) yang ada di folder {dataset_folder_path_query}: ")
 
     # Membentuk path lengkap ke file gambar
     start_time = time.time()
-    image_file_path = os.path.join(dataset_folder_path_query, query_image_input)
+    image_file_path = query_path
     try:
         query_image = process_image(image_file_path)
     except Exception as e:
@@ -154,8 +144,8 @@ def main():
 
 #try
 
-if __name__ == "__main__":
-    closest_image_id, process = main()
-    print(f"Gambar: {closest_image_id}")
-    print(f"Processing Time: {process}")
+# if __name__ == "__main__":
+#     closest_image_id, process = imageRetrieval("/Users/alfianhaniffy/Documents/ITB/ALGEO/Algeo02-23073/test/dataset/mapper/final.json","/Users/alfianhaniffy/Documents/ITB/ALGEO/Algeo02-23073/test/pca_result","/Users/alfianhaniffy/Documents/ITB/ALGEO/Algeo02-23073/test/query/image/Screenshot 2024-12-15 at 23.29.12.png")
+#     print(f"Gambar: {closest_image_id}")
+#     print(f"Processing Time: {process}")
 
