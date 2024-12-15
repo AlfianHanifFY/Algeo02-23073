@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CARI-YANG-MIRIP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="http://www.midijs.net/lib/midi.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <style>
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+      ::-webkit-scrollbar-thumb {
+        background-color: #555;
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background-color: #777;
+      }
+    </style>
+  </head>
+  <body class="bg-black text-white font-sans">
+    <div class="flex h-screen">
+      <!-- Sidebar -->
+      <aside class="w-64 bg-zinc-900 p-4 flex flex-col brightness-90">
+        <h2 class="text-2xl font-bold mb-4 text-green-400">CARI-YANG-MIRIP</h2>
+
+        <div class="space-y-2 flex-1 overflow-y-auto">
+          <a
+            href="/"
+            class="w-full text-left text-gray-200 hover:text-white hover:bg-zinc-800 p-2 rounded block"
+          >
+            <i class="fas fa-home mr-2"></i> Home
+          </a>
+          <a
+            href="/upload-dataset"
+            class="w-full text-left text-gray-200 hover:text-white hover:bg-zinc-800 p-2 rounded block"
+          >
+            <i class="fas fa-upload mr-2"></i> Upload Dataset
+          </a>
+          <div class="my-4 border-t border-gray-300"></div>
+
+          <h3 class="text-l mb-4">UPLOAD QUERY</h3>
+          <ul class="space-y-2 mt-4">
+            <!-- Humming Audio Upload Button -->
+            <li>
+              <button
+                class="w-full text-left hover:bg-zinc-800 p-2 rounded flex items-center"
+                onclick="uploadFile('humming-audio')"
+              >
+                <i class="fas fa-microphone mr-2"></i> Upload Humming Audio
+              </button>
+            </li>
+
+            <!-- Album Image Upload Button -->
+            <li>
+              <button
+                class="w-full text-left hover:bg-zinc-800 p-2 rounded flex items-center"
+                onclick="uploadFile('album-image')"
+              >
+                <i class="fas fa-image mr-2"></i> Upload Album Image
+              </button>
+            </li>
+          </ul>
+
+          <!-- Hidden File Input Elements -->
+          <input
+            type="file"
+            id="humming-audio"
+            class="hidden"
+            onchange="handleFileUpload(event, 'humming-audio')"
+          />
+
+          <input
+            type="file"
+            id="album-image"
+            class="hidden"
+            onchange="handleFileUpload(event, 'album-image')"
+          />
+
+          <div class="my-4 border-t border-gray-300"></div>
+          <h3 class="text-l mb-2">UPLOADED DATASET</h3>
+          <ul class="mt-2 space-y-1">
+            <li class="hover:bg-zinc-800 p-1 rounded text-sm">
+              Audio : {{ config.uploadedDatasetMusic }}
+            </li>
+            <li class="hover:bg-zinc-800 p-1 rounded text-sm">
+              Album : {{ config.uploadedDatasetAlbum }}
+            </li>
+            <li class="hover:bg-zinc-800 p-1 rounded text-sm">
+              Mapper : {{ config.uploadedDatasetMapper }}
+            </li>
+          </ul>
+
+          <div class="my-2 border-t border-gray-300"></div>
+
+          <h3 class="text-l mb-2">UPLOADED QUERY</h3>
+          <ul class="mt-2 space-y-1">
+            <li class="hover:bg-zinc-800 p-1 rounded text-sm">
+              Humming : {{ config.uploadedHumming }}
+            </li>
+            <li class="hover:bg-zinc-800 p-1 rounded text-sm">
+              Album : {{ config.uploadedImage }}
+            </li>
+          </ul>
+
+          <div class="flex flex-col gap-4">
+            <button
+              class="bg-green-500 text-black p-4 rounded hover:bg-green-400 mx-2"
+            >
+              Find By Humming
+            </button>
+            <button
+              class="bg-green-500 text-black p-4 rounded hover:bg-green-400 mx-2"
+            >
+              Find By Album
+            </button>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="flex-1 bg-zinc-800 p-6 overflow-y-auto">
+        <h1 class="font-bold text-3xl">Image Result</h1>
+        <div class="font-bold text-zinc-300 text-sm brightness-90 italic">
+          ( procces time : {{proccessing_time}}s )
+        </div>
+
+        <!-- Content Sections -->
+        <section class="grid grid-cols-2 gap-4 mt-2">
+          {% for item in data %}
+          <div
+            class="bg-zinc-900 p-4 rounded hover:bg-zinc-700 flex items-center gap-1"
+          >
+            <div class="w-24 h-24 bg-gray-800 rounded overflow-hidden">
+              <img
+                src="test/dataset/album/{{ item.pic_name }}"
+                alt="Album Cover"
+                class="object-cover w-full h-full"
+              />
+            </div>
+            <div class="flex flex-col justify-center ml-4">
+              <p class="text-white font-semibold text-lg">
+                {{ item.audio_file }}
+              </p>
+              <p class="text-gray-400 text-sm mb-2">
+                Album: {{ item.pic_name }}
+              </p>
+              <p class="text-gray-400 text-sm mb-2">
+                Similarity: {{ item.similarity }} %
+              </p>
+              <div class="">
+                <button
+                  onclick="testAudio('test/dataset/music/{{ item.audio_file }}')"
+                  class="bg-zinc-700 hover:bg-green-600 text-white px-4 py-2 rounded-full flex items-center gap-2 brightness-90 hover:brightness-90"
+                >
+                  <!-- Play Icon -->
+                  <i class="fas fa-play text-sm"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </section>
+
+        <!-- Pagination Footer -->
+        <div class="flex justify-center mt-6 space-x-2 bottom-0">
+          <!-- Previous Page Button -->
+          {% if current_page > 1 %}
+          <a
+            href="?page={{ current_page - 1 }}"
+            class="bg-green-500 hover:bg-green-400 text-black px-3 py-1 rounded flex items-center"
+          >
+            <i class="fas fa-arrow-left text-lg"></i>
+          </a>
+          {% else %}
+          <span
+            class="bg-green-500 text-black px-3 py-1 rounded opacity-50 cursor-not-allowed flex items-center"
+          >
+            <i class="fas fa-arrow-left text-lg"></i>
+          </span>
+          {% endif %}
+
+          <!-- Page Information -->
+          <span class="text-white">
+            Page {{ current_page }} of {{ total_pages }}
+          </span>
+
+          <!-- Next Page Button -->
+          {% if current_page < total_pages %}
+          <a
+            href="?page={{ current_page + 1 }}"
+            class="bg-green-500 hover:bg-green-400 text-black px-3 py-1 rounded flex items-center"
+          >
+            <i class="fas fa-arrow-right text-lg"></i>
+          </a>
+          {% else %}
+          <span
+            class="bg-green-500 text-black px-3 py-1 rounded opacity-50 cursor-not-allowed flex items-center"
+          >
+            <i class="fas fa-arrow-right text-lg"></i>
+          </span>
+          {% endif %}
+        </div>
+      </main>
+    </div>
+  </body>
+  <!-- Main Script -->
+  <script>
+    function testAudio(path) {
+      MIDIjs.play(path);
+    }
+
+    function uploadFile(inputId) {
+      document.getElementById(inputId).click();
+    }
+
+    async function handleFileUpload(event, inputId) {
+      const file = event.target.files[0];
+
+      if (file) {
+        try {
+          let url = "";
+
+          // Define different URLs for each file type
+          if (inputId === "humming-audio") {
+            url = "/api/upload/humming-query";
+          } else if (inputId === "album-image") {
+            url = "/api/upload/image-query";
+          }
+
+          await uploadToAPI(url, [file]);
+        } catch (error) {
+          console.error(`Failed to upload ${inputId}:`, error);
+        }
+      }
+    }
+
+    async function uploadToAPI(url, files) {
+      const formData = new FormData();
+      for (let i = 0; i < files.length; i++) {
+        formData.append("files[]", files[i]);
+      }
+
+      const response = await fetch(url, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to upload files to ${url}`);
+      }
+      const result = await response.json();
+      console.log(result.message, result.uploaded_files);
+    }
+  </script>
+</html>
