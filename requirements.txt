@@ -4,3 +4,6 @@ numpy==1.26.0         # Fundamental package for numerical computing
 werkzeug==2.3.7       # Flask dependency for handling HTTP utilities
 jinja2==3.1.2         # Flask templating engine
 python-dotenv
+scipy==1.14.1
+mido==1.3.3
+scipy==1.14.1
