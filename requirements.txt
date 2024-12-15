@@ -3,3 +3,4 @@ librosa==0.10.0.post2 # Audio and music analysis library
 numpy==1.26.0         # Fundamental package for numerical computing
 werkzeug==2.3.7       # Flask dependency for handling HTTP utilities
 jinja2==3.1.2         # Flask templating engine
+python-dotenv
