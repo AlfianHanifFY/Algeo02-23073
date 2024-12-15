@@ -1,11 +1,16 @@
 from flask import Flask, render_template, request, jsonify
 import os
 import zipfile
+from API.loadJson import *
+from jsonMaker import *
+from cleanFolder import cleanFolder
+from audioProcessing import *
+from imageProcessing import *
 
 # Initialize Flask app
 app = Flask(
     __name__, 
-    static_folder="../frontend/static",  # Serve static files
+     static_folder="../../test",  # Serve static files
     template_folder="../frontend"  # Serve HTML templates
 )
 
@@ -15,10 +20,14 @@ os.makedirs(UPLOAD_FOLDER_MUSIC, exist_ok=True)
 UPLOAD_FOLDER_ALBUM = os.path.join(os.getcwd(), "test/dataset/album")
 os.makedirs(UPLOAD_FOLDER_ALBUM, exist_ok=True)
 UPLOAD_FOLDER = os.path.join(os.getcwd(), "test/dataset/mapper")
+UPLOAD_QUERY_HUMMING = os.path.join(os.getcwd(), "test/query/humming")
+UPLOAD_QUERY_IMAGE = os.path.join(os.getcwd(), "test/query/image")
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config["UPLOAD_FOLDER_MUSIC"] = UPLOAD_FOLDER_MUSIC
 app.config["UPLOAD_FOLDER_ALBUM"] = UPLOAD_FOLDER_ALBUM
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+app.config["UPLOAD_QUERY_HUMMING"] = UPLOAD_QUERY_HUMMING
+app.config["UPLOAD_QUERY_IMAGE"] = UPLOAD_QUERY_IMAGE
 app.config["MAX_CONTENT_LENGTH"] = 16 * 1024 * 1024  
 
 @app.route("/")
