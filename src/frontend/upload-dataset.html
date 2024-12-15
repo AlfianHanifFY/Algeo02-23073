@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CARI-YANG-MIRIP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      /* Optional: Add custom scroll bar styling */
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+      ::-webkit-scrollbar-thumb {
+        background-color: #555;
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background-color: #777;
+      }
+    </style>
+  </head>
+  <body class="bg-black text-white font-sans">
+    <div class="flex h-screen">
+      <!-- Sidebar -->
+      <aside class="w-64 bg-zinc-900 p-4 flex flex-col">
+        <h2 class="text-2xl font-bold mb-4 text-green-400">CARI-YANG-MIRIP</h2>
+
+        <div class="space-y-2 flex-1 overflow-y-auto">
+          <a
+            href="/"
+            class="w-full text-left text-gray-200 hover:text-white hover:bg-zinc-800 p-2 rounded block"
+          >
+            Home
+          </a>
+          <button
+            class="w-full text-left text-gray-200 hover:text-white hover:bg-zinc-800 p-2 rounded"
+          >
+            Upload Dataset
+          </button>
+          <div class="my-4 border-t border-gray-300"></div>
+
+          <h3 class="text-l mb-4">UPLOAD QUERRY</h3>
+          <ul class="space-y-2 mt-4">
+            <li class="hover:bg-zinc-800 p-2 rounded">Humming Audio</li>
+            <li class="hover:bg-zinc-800 p-2 rounded">Album Image</li>
+          </ul>
+
+          <div class="my-4 border-t border-gray-300"></div>
+          <h3 class="text-l mb-4">UPLOADED DATASET</h3>
+          <ul class="mt-4">
+            <li class="hover:bg-zinc-800 p-2 rounded">Audio :</li>
+            <li class="hover:bg-zinc-800 p-2 rounded">Album :</li>
+            <li class="hover:bg-zinc-800 p-2 rounded">Mapper :</li>
+          </ul>
+
+          <div class="my-4 border-t border-gray-300"></div>
+          <h3 class="text-l mb-4">UPLOADED QUERRY</h3>
+          <ul class="mt-4">
+            <li class="hover:bg-zinc-800 p-2 rounded">Humming :</li>
+            <li class="hover:bg-zinc-800 p-2 rounded">Album :</li>
+          </ul>
+
+          <div class="flex flex-col gap-4">
+            <button
+              class="bg-green-500 text-black p-4 rounded hover:bg-green-400 mx-2"
+            >
+              Find By Humming
+            </button>
+            <button
+              class="bg-green-500 text-black p-4 rounded hover:bg-green-400 mx-2"
+            >
+              Find By Album
+            </button>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="flex-1 bg-zinc-800 p-6 overflow-y-auto">
+        <!-- Content Sections -->
+        <form
+          id="uploadForm"
+          class="bg-zinc-900 p-6 rounded-lg space-y-6"
+          enctype="multipart/form-data"
+        >
+          <!-- File Input 1: Music -->
+          <div>
+            <label class="block text-white mb-2 text-lg font-semibold"
+              >Music</label
+            >
+            <p class="text-gray-400 text-sm mb-2">
+              Masukkan berupa multiple audio, folder, .zip, .rar, dkk
+            </p>
+            <div
+              class="flex items-center gap-4 bg-zinc-800 rounded-lg p-4 cursor-pointer hover:bg-zinc-700"
+              onclick="document.getElementById('file_music').click()"
+            >
+              <input
+                id="file_music"
+                type="file"
+                multiple
+                class="hidden"
+                onchange="showFileName(this, 'file_music-name')"
+              />
+              <span class="text-gray-200">Choose File</span>
+            </div>
+            <p
+              id="file_music-name"
+              class="text-green-400 mt-2 text-sm font-medium"
+            ></p>
+          </div>
+
+          <!-- File Input 2: Album -->
+          <div>
+            <label class="block text-white mb-2 text-lg font-semibold"
+              >Album</label
+            >
+            <p class="text-gray-400 text-sm mb-2">
+              Masukkan berupa multiple image, folder, .zip, .rar, dkk
+            </p>
+            <div
+              class="flex items-center gap-4 bg-zinc-800 rounded-lg p-4 cursor-pointer hover:bg-zinc-700"
+              onclick="document.getElementById('file_album').click()"
+            >
+              <input
+                id="file_album"
+                type="file"
+                multiple
+                class="hidden"
+                onchange="showFileName(this, 'file_album-name')"
+              />
+              <span class="text-gray-200">Choose File</span>
+            </div>
+            <p
+              id="file_album-name"
+              class="text-green-400 mt-2 text-sm font-medium"
+            ></p>
+          </div>
+
+          <!-- File Input 3: Mapper -->
+          <div>
+            <label class="block text-white mb-2 text-lg font-semibold"
+              >Mapper</label
+            >
+            <p class="text-gray-400 text-sm mb-2">
+              Masukkan berupa file .txt atau .json
+            </p>
+            <div
+              class="flex items-center gap-4 bg-zinc-800 rounded-lg p-4 cursor-pointer hover:bg-zinc-700"
+              onclick="document.getElementById('file_mapper').click()"
+            >
+              <input
+                id="file_mapper"
+                type="file"
+                class="hidden"
+                onchange="showFileName(this, 'file_mapper-name')"
+              />
+              <span class="text-gray-200">Choose File</span>
+            </div>
+            <p
+              id="file_mapper-name"
+              class="text-green-400 mt-2 text-sm font-medium"
+            ></p>
+          </div>
+
+          <!-- Submit Button -->
+          <div class="flex justify-end">
+            <button
+              type="button"
+              onclick="uploadFiles()"
+              class="bg-green-500 text-black px-6 py-2 rounded-full hover:bg-green-400 font-semibold"
+            >
+              Upload Files
+            </button>
+          </div>
+        </form>
+
+        <script>
+          function showFileName(input, id) {
+            const fileNameElement = document.getElementById(id);
+            if (input.files.length > 0) {
+              fileNameElement.textContent = input.files[0].name;
+            }
+          }
+
+          async function uploadFiles() {
+            const musicFiles = document.getElementById("file_music").files;
+            const albumFiles = document.getElementById("file_album").files;
+            const mapperFiles = document.getElementById("file_mapper").files;
+
+            try {
+              if (musicFiles.length > 0) {
+                await uploadToAPI("/api/upload/audio-dataset", musicFiles);
+              }
+              if (albumFiles.length > 0) {
+                await uploadToAPI("/api/upload/album-dataset", albumFiles);
+              }
+              if (mapperFiles.length > 0) {
+                await uploadToAPI("/api/upload/mapper-dataset", mapperFiles);
+              }
+              alert("All files uploaded successfully");
+            } catch (error) {
+              console.error("Upload Error:", error);
+              alert("File upload failed.");
+            }
+          }
+
+          async function uploadToAPI(url, files) {
+            const formData = new FormData();
+            for (let i = 0; i < files.length; i++) {
+              formData.append("files[]", files[i]);
+            }
+
+            const response = await fetch(url, {
+              method: "POST",
+              body: formData,
+            });
+
+            if (!response.ok) {
+              throw new Error(`Failed to upload files to ${url}`);
+            }
+            const result = await response.json();
+            console.log(result.message, result.uploaded_files);
+          }
+        </script>
+      </main>
+    </div>
+  </body>
+</html>
