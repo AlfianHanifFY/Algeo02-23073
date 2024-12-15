@@ -191,17 +191,52 @@ def upload_dataset_album_files():
         return jsonify({"error": "No file part"}), 400
     
     files = request.files.getlist("files[]")  # Get the list of uploaded files
+    updateConfig("uploadedDatasetAlbum", files[0].filename)
     if not files or all(f.filename == "" for f in files):
         return jsonify({"error": "No selected files"}), 400
     
     uploaded_files = []
+    cleanFolder("test/dataset/album")
     for file in files:
         if file and file.filename != "":
-            file_path = os.path.join(app.config["UPLOAD_FOLDER_ALBUM"], file.filename)
+            filename = file.filename
+            file_path = os.path.join(UPLOAD_FOLDER_ALBUM, filename)
+
+            # Save the uploaded file temporarily
             file.save(file_path)
-            uploaded_files.append(file.filename)
-    
-    return jsonify({"message": "Files uploaded successfully", "uploaded_files": uploaded_files})
+
+            # Debug: Confirm file save
+            if not os.path.exists(file_path):
+                return jsonify({"error": f"File {file_path} was not saved"}), 500
+
+            try:
+                # Debug: Check if zipfile
+                if zipfile.is_zipfile(file_path):
+                    print(f"Extracting zip file: {file_path}")
+
+                    extract_folder_path = os.path.join(UPLOAD_FOLDER_ALBUM)
+                    os.makedirs(extract_folder_path, exist_ok=True)
+
+                    # Extract contents
+                    with zipfile.ZipFile(file_path, 'r') as zip_ref:
+                        zip_ref.extractall(extract_folder_path)
+
+                    uploaded_files.append({
+                        "original_file": filename,
+                        "extracted_contents": os.listdir(extract_folder_path)
+                    })
+
+                    # Remove the original zip file
+                    os.remove(file_path)
+                else:
+                    # Not a zip file
+                    uploaded_files.append({"file": filename})
+
+            except Exception as e:
+                print(f"Error processing {filename}: {e}")
+                return jsonify({"error": f"Failed to process {filename}: {str(e)}"}), 500
+
+    return jsonify({"message": "Files uploaded and extracted successfully", "uploaded_files": uploaded_files})
 
 @app.route("/api/upload/mapper-dataset", methods=["POST"])
 def upload_dataset_mapper_files():
@@ -211,15 +246,74 @@ def upload_dataset_mapper_files():
     files = request.files.getlist("files[]")  # Get the list of uploaded files
     if not files or all(f.filename == "" for f in files):
         return jsonify({"error": "No selected files"}), 400
-    
+
+    allowed_extensions = {".json"}
     uploaded_files = []
+    cleanFolder("test/dataset/mapper")
+    cleanFolder("test/pca_result")
     for file in files:
         if file and file.filename != "":
+            # Check if the file has a .json extension
+            _, file_extension = os.path.splitext(file.filename)
+            if file_extension.lower() not in allowed_extensions:
+                return jsonify({"error": f"Invalid file type: {file.filename}. Only .json files are allowed."}), 400
+            
             file_path = os.path.join(app.config["UPLOAD_FOLDER"], file.filename)
             file.save(file_path)
             uploaded_files.append(file.filename)
     
+    updateConfig("uploadedDatasetMapper", uploaded_files[0])
     return jsonify({"message": "Files uploaded successfully", "uploaded_files": uploaded_files})
+
+@app.route("/api/upload/humming-query", methods=["POST"])
+def upload_query_humming_files():
+    if "files[]" not in request.files:
+        return jsonify({"error": "No file part"}), 400
+    
+    files = request.files.getlist("files[]")  # Get the list of uploaded files
+    if not files or all(f.filename == "" for f in files):
+        return jsonify({"error": "No selected files"}), 400
+
+    allowed_extensions = {".wav",".mid"}
+    uploaded_files = []
+    cleanFolder("test/query/humming")
+    for file in files:
+        if file and file.filename != "":
+            _, file_extension = os.path.splitext(file.filename)
+            if file_extension.lower() not in allowed_extensions:
+                return jsonify({"error": f"Invalid file type: {file.filename}. Only .wav or .mid files are allowed."}), 400
+            
+            file_path = os.path.join(app.config["UPLOAD_QUERY_HUMMING"], file.filename)
+            file.save(file_path)
+            uploaded_files.append(file.filename)
+    updateConfig("uploadedHumming", uploaded_files[0])
+    return jsonify({"message": "Files uploaded successfully", "uploaded_files": uploaded_files})
+
+@app.route("/api/upload/image-query", methods=["POST"])
+def upload_query_image_files():
+    if "files[]" not in request.files:
+        return jsonify({"error": "No file part"}), 400
+    
+    files = request.files.getlist("files[]")  # Get the list of uploaded files
+    if not files or all(f.filename == "" for f in files):
+        return jsonify({"error": "No selected files"}), 400
+
+    allowed_extensions = {".png",".jpeg",".jpg"}
+    uploaded_files = []
+    cleanFolder("test/query/image")
+    for file in files:
+        if file and file.filename != "":
+            _, file_extension = os.path.splitext(file.filename)
+            if file_extension.lower() not in allowed_extensions:
+                return jsonify({"error": f"Invalid file type: {file.filename}. Only .png, .jpeg, .jpg files are allowed."}), 400
+            
+            file_path = os.path.join(app.config["UPLOAD_QUERY_IMAGE"], file.filename)
+            file.save(file_path)
+            uploaded_files.append(file.filename)
+    updateConfig("uploadedImage", uploaded_files[0])
+    return jsonify({"message": "Files uploaded successfully", "uploaded_files": uploaded_files})
+
+
 
 
 # Start the Flask server
