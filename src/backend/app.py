@@ -130,19 +130,19 @@ def album_result_route():
 def uploadDataSet():
     return render_template("upload-dataset.html")
 
-
-
 @app.route("/api/upload/audio-dataset", methods=["POST"])
 def upload_dataset_music_files():
     if "files[]" not in request.files:
         return jsonify({"error": "No file part"}), 400
 
-    files = request.files.getlist("files[]")  # Get the list of uploaded files
+    files = request.files.getlist("files[]")
+    
+
     if not files or all(f.filename == "" for f in files):
         return jsonify({"error": "No selected files"}), 400
-
+    updateConfig("uploadedDatasetMusic", files[0].filename)
     uploaded_files = []
-
+    cleanFolder("test/dataset/music")
     for file in files:
         if file and file.filename != "":
             filename = file.filename
@@ -151,13 +151,19 @@ def upload_dataset_music_files():
             # Save the uploaded file temporarily
             file.save(file_path)
 
+            # Debug: Confirm file save
+            if not os.path.exists(file_path):
+                return jsonify({"error": f"File {file_path} was not saved"}), 500
+
             try:
-                # Check if the uploaded file is a zip archive
+                # Debug: Check if zipfile
                 if zipfile.is_zipfile(file_path):
-                    extract_folder_path = os.path.join(UPLOAD_FOLDER_MUSIC, os.path.splitext(filename)[0])
+                    print(f"Extracting zip file: {file_path}")
+
+                    extract_folder_path = os.path.join(UPLOAD_FOLDER_MUSIC)
                     os.makedirs(extract_folder_path, exist_ok=True)
 
-                    # Extract the contents
+                    # Extract contents
                     with zipfile.ZipFile(file_path, 'r') as zip_ref:
                         zip_ref.extractall(extract_folder_path)
 
@@ -168,15 +174,16 @@ def upload_dataset_music_files():
 
                     # Remove the original zip file
                     os.remove(file_path)
-
                 else:
-                    # If it's not a zip file, just save it as-is
+                    # Not a zip file
                     uploaded_files.append({"file": filename})
 
             except Exception as e:
+                print(f"Error processing {filename}: {e}")
                 return jsonify({"error": f"Failed to process {filename}: {str(e)}"}), 500
 
     return jsonify({"message": "Files uploaded and extracted successfully", "uploaded_files": uploaded_files})
+
 
 @app.route("/api/upload/album-dataset", methods=["POST"])
 def upload_dataset_album_files():
