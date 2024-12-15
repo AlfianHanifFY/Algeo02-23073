@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify,send_from_directory
 import os
 import zipfile
 from API.loadJson import *
@@ -32,8 +32,99 @@ app.config["MAX_CONTENT_LENGTH"] = 16 * 1024 * 1024
 
 @app.route("/")
 def index():
-    nama = ["alfian","heleni","soni"]
-    return render_template("index.html", nama=nama)  
+    config = load_json("config/config.json")
+    url = "dataset/mapper/" + config[0]['uploadedDatasetMapper']
+    if config[0]['uploadedDatasetMapper'] == '':
+        url = "dataset/mapper/awikwok"
+
+    # Load all data
+    data = load_json(url)
+
+    # Pagination logic
+    page = int(request.args.get('page', 1))  # Get page number from query string, default to 1
+    per_page = 8  # Number of items per page
+    total_pages = (len(data) + per_page - 1) // per_page  # Calculate total pages
+
+    # Slice the data for the current page
+    start = (page - 1) * per_page
+    end = start + per_page
+    paginated_data = data[start:end]
+
+    return render_template(
+        "home.html",
+        data=paginated_data,
+        config=config[0],
+        current_page=page,
+        total_pages=total_pages
+    )
+    
+@app.route("/humming-result")
+def humming_result_route():
+    config = load_json("config/config.json")
+    
+    # create url
+    mapperUrl = "test/dataset/mapper/" + config[0]['uploadedDatasetMapper']
+    if config[0]['uploadedDatasetMapper'] == '':
+        mapperUrl = "test/dataset/mapper/awikwok"
+    audioUrl = "test/query/humming/" + config[0]['uploadedHumming']
+    if config[0]['uploadedHumming'] == '':
+        audioUrl = "test/query/humming/wwwww"
+    
+    # Load all data
+    data,proccessing_time = search_manual_midi_files(audioUrl,mapperUrl,"test/dataset/music")
+
+    # Pagination logic
+    page = int(request.args.get('page', 1))  # Get page number from query string, default to 1
+    per_page = 8  # Number of items per page
+    total_pages = (len(data) + per_page - 1) // per_page  # Calculate total pages
+
+    # Slice the data for the current page
+    start = (page - 1) * per_page
+    end = start + per_page
+    paginated_data = data[start:end]
+
+    return render_template(
+        "humming-result.html",
+        data=paginated_data,
+        config=config[0],
+        current_page=page,
+        total_pages=total_pages,
+        proccessing_time = proccessing_time
+    )
+    
+@app.route("/album-result")
+def album_result_route():
+    config = load_json("config/config.json")
+    
+    # create url
+    mapperUrl = "test/dataset/mapper/" + config[0]['uploadedDatasetMapper']
+    if config[0]['uploadedDatasetMapper'] == '':
+        mapperUrl = "test/dataset/mapper/awikwok"
+    imageUrl = "test/query/image/" + config[0]['uploadedImage']
+    if config[0]['uploadedImage'] == '':
+        imageUrl = "test/query/image/wwwww"
+    
+    # Load all data
+    data,proccessing_time = imageRetrieval(mapperUrl,"test/pca_result/", imageUrl)
+
+    # Pagination logic
+    page = int(request.args.get('page', 1))  # Get page number from query string, default to 1
+    per_page = 8  # Number of items per page
+    total_pages = (len(data) + per_page - 1) // per_page  # Calculate total pages
+
+    # Slice the data for the current page
+    start = (page - 1) * per_page
+    end = start + per_page
+    paginated_data = data[start:end]
+
+    return render_template(
+        "image-result.html",
+        data=paginated_data,
+        config=config[0],
+        current_page=page,
+        total_pages=total_pages,
+        proccessing_time = proccessing_time
+    )
 
 @app.route("/upload-dataset")
 def uploadDataSet():
