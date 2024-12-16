@@ -192,12 +192,14 @@ def find_similarities(query_file, json_file_path, base_dir, weights, window_size
         if file.endswith('.mid'):
             midi_windows = process_midi(file_path, window_size, step_size)
             midi_distribution = extract_tone_distribution(np.concatenate(midi_windows))
+            similarity = compute_weighted_similarity(query_distribution, midi_distribution, weights)
 
         elif file.endswith('.wav'):
-            wav_windows = process_wav(file_path, window_size, step_size)
+            wav_windows = process_wav(file_path,22050, window_size, step_size)
             wav_distribution = extract_tone_distribution(np.concatenate(wav_windows))
+            similarity = compute_weighted_similarity(query_distribution, wav_distribution, weights)
 
-        similarity = compute_weighted_similarity(query_distribution, midi_distribution, weights)
+        
 
         pic_name = next((entry['pic_name'] for entry in mapper if entry['audio_file'] == file), "Unknown")
 

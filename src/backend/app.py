@@ -29,7 +29,7 @@ app.config["UPLOAD_FOLDER_ALBUM"] = UPLOAD_FOLDER_ALBUM
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 app.config["UPLOAD_QUERY_HUMMING"] = UPLOAD_QUERY_HUMMING
 app.config["UPLOAD_QUERY_IMAGE"] = UPLOAD_QUERY_IMAGE
-app.config["MAX_CONTENT_LENGTH"] = 100 * 1024 * 1024
+app.config["MAX_CONTENT_LENGTH"] = 500 * 1024 * 1024
 
 @app.route("/")
 def index():
@@ -62,7 +62,7 @@ def index():
 @app.route("/humming-result")
 def humming_result_route():
     config = load_json("config/config.json")
-    weights = {"ATB": 1, "RTB": 1, "FTB": 1 }
+    weights = {"ATB": 0.5, "RTB": 2, "FTB": 1 }
     # create url
     mapperUrl = "test/dataset/mapper/" + config[0]['uploadedDatasetMapper']
     if config[0]['uploadedDatasetMapper'] == '':
@@ -72,7 +72,7 @@ def humming_result_route():
         audioUrl = "test/query/humming/wwwww"
     
     # Load all data
-    data,proccessing_time = find_similarities(audioUrl,mapperUrl,"test/dataset/music/",weights,20,8)
+    data,proccessing_time = find_similarities(audioUrl,mapperUrl,"test/dataset/music/",weights)
 
     # Pagination logic
     page = int(request.args.get('page', 1))  # Get page number from query string, default to 1
