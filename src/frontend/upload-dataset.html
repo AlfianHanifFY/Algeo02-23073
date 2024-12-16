@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CARI-YANG-MIRIP</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="http://www.midijs.net/lib/midi.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
     <style>
       /* Optional: Add custom scroll bar styling */
       ::-webkit-scrollbar {
@@ -22,7 +27,7 @@
   <body class="bg-black text-white font-sans">
     <div class="flex h-screen">
       <!-- Sidebar -->
-      <aside class="w-64 bg-zinc-900 p-4 flex flex-col">
+      <aside class="w-64 bg-zinc-900 p-4 flex flex-col brightness-90">
         <h2 class="text-2xl font-bold mb-4 text-green-400">CARI-YANG-MIRIP</h2>
 
         <div class="space-y-2 flex-1 overflow-y-auto">
@@ -30,47 +35,95 @@
             href="/"
             class="w-full text-left text-gray-200 hover:text-white hover:bg-zinc-800 p-2 rounded block"
           >
-            Home
+            <i class="fas fa-home mr-2"></i> Home
           </a>
-          <button
-            class="w-full text-left text-gray-200 hover:text-white hover:bg-zinc-800 p-2 rounded"
+          <a
+            href="/upload-dataset"
+            class="w-full text-left text-gray-200 hover:text-white hover:bg-zinc-800 p-2 rounded block"
           >
-            Upload Dataset
-          </button>
+            <i class="fas fa-upload mr-2"></i> Upload Dataset
+          </a>
           <div class="my-4 border-t border-gray-300"></div>
 
-          <h3 class="text-l mb-4">UPLOAD QUERRY</h3>
+          <h3 class="text-l mb-4">UPLOAD QUERY</h3>
           <ul class="space-y-2 mt-4">
-            <li class="hover:bg-zinc-800 p-2 rounded">Humming Audio</li>
-            <li class="hover:bg-zinc-800 p-2 rounded">Album Image</li>
+            <!-- Humming Audio Upload Button -->
+            <li>
+              <button
+                class="w-full text-left hover:bg-zinc-800 p-2 rounded flex items-center"
+                onclick="alert('gak bisa upload heheheheheheheh!')"
+              >
+                <i class="fas fa-microphone mr-2"></i> Upload Humming Audio
+              </button>
+            </li>
+
+            <!-- Album Image Upload Button -->
+            <li>
+              <button
+                class="w-full text-left hover:bg-zinc-800 p-2 rounded flex items-center"
+                onclick="alert('gak bisa upload heheheheheheheh!')"
+              >
+                <i class="fas fa-image mr-2"></i> Upload Album Image
+              </button>
+            </li>
           </ul>
 
-          <div class="my-4 border-t border-gray-300"></div>
-          <h3 class="text-l mb-4">UPLOADED DATASET</h3>
-          <ul class="mt-4">
-            <li class="hover:bg-zinc-800 p-2 rounded">Audio :</li>
-            <li class="hover:bg-zinc-800 p-2 rounded">Album :</li>
-            <li class="hover:bg-zinc-800 p-2 rounded">Mapper :</li>
-          </ul>
+          <!-- Hidden File Input Elements -->
+          <input
+            type="file"
+            id="humming-audio"
+            class="hidden"
+            onchange="handleFileUpload(event, 'humming-audio')"
+          />
+
+          <input
+            type="file"
+            id="album-image"
+            class="hidden"
+            onchange="handleFileUpload(event, 'album-image')"
+          />
 
           <div class="my-4 border-t border-gray-300"></div>
-          <h3 class="text-l mb-4">UPLOADED QUERRY</h3>
-          <ul class="mt-4">
-            <li class="hover:bg-zinc-800 p-2 rounded">Humming :</li>
-            <li class="hover:bg-zinc-800 p-2 rounded">Album :</li>
+          <h3 class="text-l mb-2">UPLOADED DATASET</h3>
+          <ul class="mt-2 space-y-1">
+            <li class="hover:bg-zinc-800 p-1 rounded text-sm">
+              Audio : {{ config.uploadedDatasetMusic }}
+            </li>
+            <li class="hover:bg-zinc-800 p-1 rounded text-sm">
+              Album : {{ config.uploadedDatasetAlbum }}
+            </li>
+            <li class="hover:bg-zinc-800 p-1 rounded text-sm">
+              Mapper : {{ config.uploadedDatasetMapper }}
+            </li>
+          </ul>
+
+          <div class="my-2 border-t border-gray-300"></div>
+
+          <h3 class="text-l mb-2">UPLOADED QUERY</h3>
+          <ul class="mt-2 space-y-1">
+            <li class="hover:bg-zinc-800 p-1 rounded text-sm">
+              Humming : {{ config.uploadedHumming }}
+            </li>
+            <li class="hover:bg-zinc-800 p-1 rounded text-sm">
+              Album : {{ config.uploadedImage }}
+            </li>
           </ul>
 
           <div class="flex flex-col gap-4">
-            <button
-              class="bg-green-500 text-black p-4 rounded hover:bg-green-400 mx-2"
+            <a href="/humming-result"
+              ><button
+                class="bg-green-500 text-black p-4 rounded hover:bg-green-400 mx-2"
+              >
+                Find By Humming
+              </button></a
             >
-              Find By Humming
-            </button>
-            <button
-              class="bg-green-500 text-black p-4 rounded hover:bg-green-400 mx-2"
-            >
-              Find By Album
-            </button>
+            <a href="/album-result">
+              <button
+                class="bg-green-500 text-black p-4 rounded hover:bg-green-400 mx-2"
+              >
+                Find By Album
+              </button>
+            </a>
           </div>
         </div>
       </aside>

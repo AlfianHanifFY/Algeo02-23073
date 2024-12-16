@@ -215,8 +215,26 @@
   </body>
   <!-- Main Script -->
   <script>
+    let audioPlayer;
     function testAudio(path) {
-      MIDIjs.play(path);
+      const fileExtension = path.split(".").pop().toLowerCase();
+
+      if (fileExtension === "mid") {
+        if (audioPlayer) {
+          audioPlayer.pause();
+          audioPlayer = null;
+        }
+        MIDIjs.play(path);
+      } else if (fileExtension === "wav") {
+        if (audioPlayer) {
+          audioPlayer.pause();
+        }
+        MIDIjs.stop();
+        audioPlayer = new Audio(path);
+        audioPlayer.play();
+      } else {
+        console.error("Unsupported file format: " + fileExtension);
+      }
     }
 
     function uploadFile(inputId) {
