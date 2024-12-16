@@ -1,9 +1,9 @@
 [
     {
-        "uploadedDatasetAlbum": "",
-        "uploadedDatasetMusic": "",
-        "uploadedDatasetMapper": "",
+        "uploadedDatasetAlbum": "album.zip",
+        "uploadedDatasetMusic": "musik.zip",
+        "uploadedDatasetMapper": "final.json",
         "uploadedImage": "",
-        "uploadedHumming": ""
+        "uploadedHumming": "Never-Gonna-Give-You-Up.mid"
     }
 ]
