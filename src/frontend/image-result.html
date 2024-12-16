@@ -220,19 +220,16 @@
       const fileExtension = path.split(".").pop().toLowerCase();
 
       if (fileExtension === "mid") {
-        // Play MIDI file using MIDI.js
         if (audioPlayer) {
-          // Stop WAV playback if active
           audioPlayer.pause();
           audioPlayer = null;
         }
         MIDIjs.play(path);
       } else if (fileExtension === "wav") {
-        // Play WAV file using HTML5 Audio
         if (audioPlayer) {
-          audioPlayer.pause(); // Stop the current audio if playing
+          audioPlayer.pause();
         }
-        MIDIjs.stop(); // Stop any active MIDI playback
+        MIDIjs.stop();
         audioPlayer = new Audio(path);
         audioPlayer.play();
       } else {

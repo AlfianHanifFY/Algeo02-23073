@@ -12,7 +12,7 @@ def normalize_pitch(pitches, epsilon=1e-8):
     std_pitch = np.std(pitches)
 
     if std_pitch < epsilon:
-        return np.zeros_like(pitches)  # Mengembalikan array nol jika variansi terlalu kecil
+        return np.zeros_like(pitches) 
 
     res = (pitches - mean_pitch) / (std_pitch + epsilon)
     print(f"Mean pitch: {mean_pitch}, Std pitch: {std_pitch}")
@@ -20,18 +20,12 @@ def normalize_pitch(pitches, epsilon=1e-8):
     return res
 
 def filter_pitches(pitches, threshold=50):
-    """
-    Menghapus pitch dengan nilai yang lebih kecil dari threshold.
-    """
     return [pitch for pitch in pitches if pitch >= threshold]
 
 def filter_sparse_notes(notes):
     return notes
 
 def extract_pitches(y, sr):
-    """
-    Extract pitches from the audio signal without chroma features.
-    """
     onset_env = librosa.onset.onset_strength(y=y, sr=sr)
     peaks, _ = find_peaks(onset_env, height=0.1)
     pitches, magnitudes = librosa.core.piptrack(y=y, sr=sr)
@@ -54,7 +48,7 @@ def process_wav(file_path, sr=22050, window_size=40, step_size=8):
     detected_pitches, _ = extract_pitches(y, sr)
     detected_pitches = np.array(detected_pitches)
 
-    # Validasi pitch non-zero dan tanpa NaN
+
     detected_pitches = detected_pitches[~np.isnan(detected_pitches)]
     detected_pitches = detected_pitches[detected_pitches > 0]
 
@@ -79,7 +73,7 @@ def process_midi(file_path, window_size=40, step_size=8):
     if not melody_notes:
         raise ValueError("No valid melody notes found in the MIDI file.")
 
-    # Filter sparse notes
+
     filtered_notes = filter_sparse_notes(np.array(melody_notes))
     if len(filtered_notes) == 0:
         raise ValueError("Filtered notes are empty.")
@@ -96,7 +90,7 @@ def compute_normalized_histogram(data, bins, range_):
 
     total = np.sum(histogram)
     if total == 0:
-        return np.ones_like(histogram) / len(histogram)  # Distribusi uniform jika total nol
+        return np.ones_like(histogram) / len(histogram) 
 
     normalized = histogram / np.sum(histogram)
     return normalized
@@ -113,9 +107,6 @@ def compute_ftb(notes):
     return compute_normalized_histogram(intervals, bins=np.arange(-127, 127), range_=(-127, 127))
 
 def extract_tone_distribution(notes):
-    """
-    Ekstraksi fitur distribusi tone berdasarkan ATB, RTB, dan FTB.
-    """
     atb = compute_atb(notes)
     rtb = compute_rtb(notes)
     ftb = compute_ftb(notes)
@@ -126,9 +117,6 @@ def extract_tone_distribution(notes):
     }
 
 def cosine_similarity(vec1, vec2):
-    """
-    Menghitung cosine similarity antara dua vektor.
-    """
     dot_product = np.dot(vec1, vec2)
     norm_product = norm(vec1) * norm(vec2)
     if norm_product == 0:
@@ -189,13 +177,3 @@ def find_similarities(query_file, json_file_path, base_dir, weights, window_size
 
     processing_time = time.time() - start_time
     return sorted(results, key=lambda x: x['similarity'], reverse=True), processing_time
-
-# Example usage
-# mapper_path = "/Users/alfianhaniffy/Documents/ITB/ALGEO/Algeo02-23073/test/dataset/mapper/final.json"
-# weights = {"ATB": 0.5, "RTB": 1.5, "FTB": 1}
-# midi_folder = "/Users/alfianhaniffy/Documents/ITB/ALGEO/Algeo02-23073/test/dataset/music"
-# audio_file = "/Users/alfianhaniffy/Documents/ITB/ALGEO/Algeo02-23073/test/query/humming/resonate 1734319883300.wav"
-
-# results, time_taken = find_similarities(audio_file, mapper_path, midi_folder, weights)
-# print("Results:", results)
-# print("Processing time:", time_taken, "seconds")
