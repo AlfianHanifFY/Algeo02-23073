@@ -96,7 +96,6 @@ def calculate_audio_midi_similarity(audio_file, midi_file_to_compare):
 
     return similarity
 
-
 def search_manual_midi_files(audio_file, json_file_path, base_dir):
     # Load MIDI file paths from the JSON file
     start_time = time.time()
@@ -161,4 +160,3 @@ def search_manual_midi_files(audio_file, json_file_path, base_dir):
 # # Print top 4 results
 # for result in similarities:
 #     print(f"music: {result['audio_file']}, album: {result['pic_name']}, Similarity: {result['similarity']:.4f}, proses = {proccessing_time}")
-
