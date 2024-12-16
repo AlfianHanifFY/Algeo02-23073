@@ -28,8 +28,10 @@ def filter_pitches(pitches, threshold=50):
 def filter_sparse_notes(notes):
     return notes
 
-
 def extract_pitches(y, sr):
+    """
+    Extract pitches from the audio signal without chroma features.
+    """
     onset_env = librosa.onset.onset_strength(y=y, sr=sr)
     peaks, _ = find_peaks(onset_env, height=0.1)
     pitches, magnitudes = librosa.core.piptrack(y=y, sr=sr)
@@ -46,38 +48,16 @@ def extract_pitches(y, sr):
     print(f"Total pitches detected: {len(detected_pitches)}")
     return detected_pitches, peaks / sr
 
-def extract_pitches_and_chroma(y, sr):
-    # Menggunakan metode pembuatan fitur pitch
-    onset_env = librosa.onset.onset_strength(y=y, sr=sr)
-    peaks, _ = find_peaks(onset_env, height=0.1)
-    pitches, magnitudes = librosa.core.piptrack(y=y, sr=sr)
-
-    detected_pitches = []
-    for peak in peaks:
-        index = np.argmax(magnitudes[:, peak])
-        pitch_value = pitches[index, peak]
-        if 100 < pitch_value < 1000:
-            detected_pitches.append(pitch_value)
-
-    print(f"Detected pitches: {detected_pitches}")
-
-    # Menghitung fitur Chroma dari sinyal audio
-    chroma = librosa.feature.chroma_stft(y=y, sr=sr)
-    chroma_mean = np.mean(chroma, axis=1)  # Rata-rata setiap chroma bin
-
-    return detected_pitches, chroma_mean
-
-
 def process_wav(file_path, sr=22050, window_size=40, step_size=8):
     y, sr = librosa.load(file_path, sr=sr)
-    
+
     detected_pitches, _ = extract_pitches(y, sr)
     detected_pitches = np.array(detected_pitches)
 
     # Validasi pitch non-zero dan tanpa NaN
     detected_pitches = detected_pitches[~np.isnan(detected_pitches)]
     detected_pitches = detected_pitches[detected_pitches > 0]
-    
+
     normalized_pitches = normalize_pitch(detected_pitches)
 
     windows = [
@@ -89,6 +69,7 @@ def process_wav(file_path, sr=22050, window_size=40, step_size=8):
         raise ValueError("Windowing produced no valid segments.")
 
     return windows
+
 def process_midi(file_path, window_size=40, step_size=8):
     midi_file = mido.MidiFile(file_path)
     melody_notes = [
@@ -102,21 +83,21 @@ def process_midi(file_path, window_size=40, step_size=8):
     filtered_notes = filter_sparse_notes(np.array(melody_notes))
     if len(filtered_notes) == 0:
         raise ValueError("Filtered notes are empty.")
-    
+
     normalized_midi_notes = normalize_pitch(filtered_notes)
     windows = [
-        normalized_midi_notes[i:i+window_size]
+        normalized_midi_notes[i:i + window_size]
         for i in range(0, len(normalized_midi_notes) - window_size + 1, step_size)
     ]
     return windows
 
 def compute_normalized_histogram(data, bins, range_):
     histogram, _ = np.histogram(data, bins=bins, range=range_)
-    total = np.sum(histogram)
 
+    total = np.sum(histogram)
     if total == 0:
         return np.ones_like(histogram) / len(histogram)  # Distribusi uniform jika total nol
-    
+
     normalized = histogram / np.sum(histogram)
     return normalized
 
@@ -163,7 +144,6 @@ def compute_weighted_similarity(midi_distribution, wav_distribution, weights):
     total_similarity = sum(similarities.values()) / sum(weights.values())
     return total_similarity
 
-
 def find_similarities(query_file, json_file_path, base_dir, weights, window_size=20, step_size=8):
     start_time = time.time()
 
@@ -195,11 +175,9 @@ def find_similarities(query_file, json_file_path, base_dir, weights, window_size
             similarity = compute_weighted_similarity(query_distribution, midi_distribution, weights)
 
         elif file.endswith('.wav'):
-            wav_windows = process_wav(file_path,22050, window_size, step_size)
+            wav_windows = process_wav(file_path, 22050, window_size, step_size)
             wav_distribution = extract_tone_distribution(np.concatenate(wav_windows))
             similarity = compute_weighted_similarity(query_distribution, wav_distribution, weights)
-
-        
 
         pic_name = next((entry['pic_name'] for entry in mapper if entry['audio_file'] == file), "Unknown")
 
@@ -212,13 +190,12 @@ def find_similarities(query_file, json_file_path, base_dir, weights, window_size
     processing_time = time.time() - start_time
     return sorted(results, key=lambda x: x['similarity'], reverse=True), processing_time
 
-
 # Example usage
 # mapper_path = "/Users/alfianhaniffy/Documents/ITB/ALGEO/Algeo02-23073/test/dataset/mapper/final.json"
 # weights = {"ATB": 0.5, "RTB": 1.5, "FTB": 1}
 # midi_folder = "/Users/alfianhaniffy/Documents/ITB/ALGEO/Algeo02-23073/test/dataset/music"
 # audio_file = "/Users/alfianhaniffy/Documents/ITB/ALGEO/Algeo02-23073/test/query/humming/resonate 1734319883300.wav"
 
-# results, time_taken = find_similarities(audio_file,mapper_path,midi_folder, weights)
+# results, time_taken = find_similarities(audio_file, mapper_path, midi_folder, weights)
 # print("Results:", results)
 # print("Processing time:", time_taken, "seconds")

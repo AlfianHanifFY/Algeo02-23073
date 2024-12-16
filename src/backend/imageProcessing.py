@@ -96,6 +96,7 @@ def read_json_and_process (album_data):
     save_pca_results(mean_pixel, Uk, X_projected)
 
 def imageRetrieval(json_path,pca_result_path,query_path):
+    start_time = time.time()
     with open(json_path, 'r') as file:
         album_data = json.load(file)
             
@@ -106,7 +107,7 @@ def imageRetrieval(json_path,pca_result_path,query_path):
     mean_pixel, Uk, X_projected = load_pca_results()
 
     # Membentuk path lengkap ke file gambar
-    start_time = time.time()
+    
     image_file_path = query_path
     try:
         query_image = process_image(image_file_path)
@@ -127,14 +128,14 @@ def imageRetrieval(json_path,pca_result_path,query_path):
         
         ordered_results = []
         for idx in sorted_indices:
-            album_info = album_data[idx].copy()  # Salin informasi album
-            album_info["distance"] = distances[idx]  # Tambahkan jarak ke informasi album
-
-            similarity_percentage = (1 - (distances[idx] / max_distance)) * 100
-            similarity_percentage = max(0.0, similarity_percentage)  # Menghindari nilai negatif
-
-            album_info["similarity"] = similarity_percentage  # Tambahkan persentase kemiripan
-            ordered_results.append(album_info)  # Simpan informasi album ke hasil urutan
+            similarity_percentage = (1-(distances[idx]/max_distance)) * 100
+            similarity_percentage = max(0.0, similarity_percentage)
+            
+            if similarity_percentage >=55:
+                album_info = album_data[idx].copy()  # Salin informasi album
+                album_info["distance"] = distances[idx]  # Tambahkan jarak ke informasi album
+                album_info["similarity"] = format(similarity_percentage, '.4f')  # Tambahkan persentase kemiripan
+                ordered_results.append(album_info)  # Simpan informasi album ke hasil urutan
 
         end_time = time.time()
         processing_time = end_time - start_time
